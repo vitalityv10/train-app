@@ -1,19 +1,49 @@
 import React from 'react';
-import { Alert, Container, Navbar } from 'react-bootstrap'; 
+import { Container, Navbar, Nav } from 'react-bootstrap'; 
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+
+const NavLink = styled(Link)`
+  text-decoration: none;
+  color: #281d8d !important; 
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+
+  &:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+  }
+`;
+
+const Separator = styled.span`
+  color: #281d8d;
+  font-weight: bold;
+  @media (max-width: 991px) {
+    display: none;
+  }
+`;
 
 export default function Menu() {
     return (
-       <Navbar>
+       <Navbar bg="light" expand="lg" className="shadow-sm">
             <Container>
-                <Navbar.Brand href="#home">Welcome to our site</Navbar.Brand>
-                <Navbar.Toggle />
-                <Navbar.Collapse className="justify-content-end">
-                    <Navbar.Text>
-                        Signed in as: <a href="#login">Bruce Benner</a>
-                    </Navbar.Text>
-                </Navbar.Collapse>
+              <Navbar.Toggle aria-controls="menu-auth-nav" />
+              
+              <Navbar.Collapse id="menu-auth-nav">
+                <Nav className="ms-auto align-items-center">
+                    
+                    <NavLink to="/login">Login</NavLink>
+                    <Separator>|</Separator>
+                    <NavLink to="/register">Register</NavLink>
+                    <Separator>|</Separator>
+                    <NavLink to="/profile">My Profile</NavLink>
+                    
+                </Nav>
+              </Navbar.Collapse>
             </Container>
-        </Navbar>
-
+          </Navbar>
     );
 }
