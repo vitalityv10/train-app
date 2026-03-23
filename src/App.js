@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Navbar } from 'react-bootstrap';
 import './App.css'; 
 
 import { AuthProvider } from './components/auth/AuthContext';
@@ -12,7 +12,6 @@ import Menu from './components/menu/Menu';
 import Home from './components/Home'; 
 import About from './components/menu/About';
 import Login from './components/auth/Login';
-import Register from './components/auth/Register';
 import UserProfile from './components/user/UserProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';  
 
@@ -41,13 +40,13 @@ export default function App() {
           
         </Row>
       </Container>
-      
+    
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About isUK={isUK} />} />
         
         <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
+        {/* <Route path='/register' element={<Register />} /> */}
         
         <Route path='/profile' element={
           <ProtectedRoute>

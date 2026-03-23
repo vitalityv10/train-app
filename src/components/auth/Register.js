@@ -18,7 +18,7 @@ export default function Register() {
     if (formData.name.trim() && formData.age && formData.city.trim()) {
       const userExists = registeredUsers.some(u => u.name === formData.name);
       if (userExists) {
-        alert("User not found! Please choose a different name.");
+        alert("User found! Please choose a different name.");
         return;
       }
 

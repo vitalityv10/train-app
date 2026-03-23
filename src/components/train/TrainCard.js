@@ -1,16 +1,32 @@
 import React, { useState } from 'react';
-import { Card, Button, Modal } from 'react-bootstrap'; 
+import { Card, Button, Modal, Badge } from 'react-bootstrap'; 
 import TrainImage from './train-photo/train1.webp';
 
 export default function TrainCard({ train }) {
   const [showModal, setShowModal] = useState(false);
+  
+  const [isSelected, setIsSelected] = useState(false);
 
   const handleClose = () => setShowModal(false);
-  const handleShow = () => setShowModal(true);
+  
+  const handleShow = (e) => {
+    e.stopPropagation(); 
+    setShowModal(true);
+  };
 
   return (
     <>
-      <Card className="h-100 shadow-sm">
+      <Card 
+        className={`h-100 shadow-sm ${isSelected ? 'border-success border-3' : ''}`}
+        onClick={() => setIsSelected(!isSelected)}
+        style={{ cursor: 'pointer', position: 'relative' }}
+      >
+        {isSelected && (
+          <Badge bg="success" style={{ position: 'absolute', top: 10, right: 10, zIndex: 1, fontSize: '1rem' }}>
+            Selected
+          </Badge>
+        )}
+
         <Card.Img variant="top" src={TrainImage} alt={train.route} />
         <Card.Body className="d-flex flex-column">
           <Card.Title>{train.title}</Card.Title>
@@ -22,8 +38,7 @@ export default function TrainCard({ train }) {
         </Card.Body>
       </Card>
 
-      <Modal show={showModal} 
-          onHide={handleClose} centered>
+      <Modal show={showModal} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Information about train No. {train.number}</Modal.Title>
         </Modal.Header>
