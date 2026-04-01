@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
-import { Container, Row, Col, Navbar } from 'react-bootstrap';
+import { Container, Row, Col} from 'react-bootstrap';
 import './App.css'; 
 
 import { AuthProvider } from './components/auth/AuthContext';
@@ -13,7 +13,9 @@ import Home from './components/Home';
 import About from './components/menu/About';
 import Login from './components/auth/Login';
 import UserProfile from './components/user/UserProfile';
-import ProtectedRoute from './components/auth/ProtectedRoute';  
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Cart from './components/Cart';
+import { WishList } from './components/WishList';  
 
 const Header = styled.header`
   border: 2px solid #281d8d;
@@ -47,6 +49,8 @@ export default function App() {
         
         <Route path='/login' element={<Login />} />
         {/* <Route path='/register' element={<Register />} /> */}
+        <Route path='/cart' element={<Cart />} />
+        <Route path='/wish-list' element={ <WishList />} />
         
         <Route path='/profile' element={
           <ProtectedRoute>

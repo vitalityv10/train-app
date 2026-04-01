@@ -55,6 +55,10 @@ export default function Menu() {
 
                     {user && (
                         <>
+                        <NavLink to="/wish-list">Wish List</NavLink>
+                          <Separator>|</Separator>
+                        <NavLink to="/cart">Cart</NavLink>
+                        <Separator>|</Separator>
                         <NavLink to="/profile">My Profile</NavLink>    
                         <Separator>|</Separator>
                         <StyledButton  onClick={logout}>Logout</StyledButton>
