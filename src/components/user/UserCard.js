@@ -10,9 +10,6 @@ export default function UserCard({ name, age, city, onGreet }) {
           <strong>Age:</strong> {age} <br />
           <strong>City:</strong> {city}
         </Card.Text>
-        <Button variant="outline-primary" onClick={() => onGreet(name)}>
-          Show Greeting
-        </Button>
       </Card.Body>
     </Card>
   );

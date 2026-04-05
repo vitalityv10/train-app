@@ -4,19 +4,37 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  
+
   const [registeredUsers, setRegisteredUsers] = useState([
-    { id: 1, name: 'Admin', age: 20, city: 'Kyiv' , cart: { userId: 1, items: [] } }
+    { id: 1, name: 'Admin', age: 20, city: 'Kyiv', cart: { userId: 1, items: [] } }
   ]);
 
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('trainCart');
-    return savedCart ? JSON.parse(savedCart) : { userId: null, items: [] };
+    const saved = localStorage.getItem('trainCart');
+    return saved ? JSON.parse(saved) : { userId: null, items: [] };
+  });
+
+  const [wishlist, setWishlist] = useState(() => {
+    const saved = localStorage.getItem('trainWishlist');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [purchasedTickets, setPurchasedTickets] = useState(() => {
+    const saved = localStorage.getItem('purchasedTickets');
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
     localStorage.setItem('trainCart', JSON.stringify(cart));
   }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('trainWishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  useEffect(() => {
+    localStorage.setItem('purchasedTickets', JSON.stringify(purchasedTickets));
+  }, [purchasedTickets]);
 
   const login = (userData) => {
     setUser(userData);
@@ -25,13 +43,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    setCart({ userId: null, items: [] }); 
+    setCart({ userId: null, items: [] });
   };
 
   const addToCart = (train) => {
     setCart(prev => {
-      const existingItem = prev.items.find(item => item.id === train.id);
-      if (existingItem) {
+      const existing = prev.items.find(item => item.id === train.id);
+      if (existing) {
         return {
           ...prev,
           items: prev.items.map(item =>
@@ -59,35 +77,36 @@ export const AuthProvider = ({ children }) => {
     }));
   };
 
- const [wishlist, setWishlist] = useState(() => {
-  const saved = localStorage.getItem('trainWishlist');
-  return saved ? JSON.parse(saved) : [];
-});
+  const clearCart = () => {
+    setCart({ userId: user?.id ?? null, items: [] });
+  };
 
-useEffect(() => {
-  localStorage.setItem('trainWishlist', JSON.stringify(wishlist));
-}, [wishlist]);
+  const addToWishlist = (train) => {
+    setWishlist(prev => {
+      if (prev.find(item => item.id === train.id)) return prev;
+      return [...prev, train];
+    });
+  };
 
-const addToWishlist = (train) => {
-  setWishlist(prev => {
-    const exists = prev.find(item => item.id === train.id);
-    if (exists) return prev; 
-    return [...prev, train];
-  });
-};
+  const removeFromWishlist = (id) => {
+    setWishlist(prev => prev.filter(item => item.id !== id));
+  };
 
-const removeFromWishlist = (id) => {
-  setWishlist(prev => prev.filter(item => item.id !== id));
-};
+  const purchaseTickets = (tickets) => {
+    setPurchasedTickets(prev => [...prev, ...tickets]);
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, login, logout, cart, addToCart, updateQuantity, removeFromCart,
-       registeredUsers, setRegisteredUsers, wishlist, addToWishlist, removeFromWishlist
+    <AuthContext.Provider value={{
+      user, login, logout,
+      cart, addToCart, updateQuantity, removeFromCart, clearCart,
+      wishlist, addToWishlist, removeFromWishlist,
+      purchasedTickets, purchaseTickets,
+      registeredUsers, setRegisteredUsers,
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
 
 export const useAuth = () => useContext(AuthContext);

@@ -4,15 +4,19 @@ export function useFilteredTrains(trains, filters, itemsPerPage) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const filtered = trains.filter(train => {
-    const matchesSearch = train.number.includes(filters.searchQuery);
-    const matchesSearchName = train.route.join(' → ').toLowerCase()
-              .includes(filters.searchQuery.toLowerCase());
-    const matchesWifi = filters.wifiOnly ? train.hasWifi : true;
-    const matchesPrice = train.price <= filters.maxPrice;
-    const matchesCity = filters.selectedCity === '' || train.route.includes(filters.selectedCity);
+  const routeString = `${train.route.from.city} ${train.route.to.city}`.toLowerCase();
 
-    return matchesSearch || matchesSearchName && matchesWifi && matchesPrice && matchesCity;
-  });
+  const matchesSearch = train.number.includes(filters.searchQuery);
+  const matchesSearchName = routeString.includes(filters.searchQuery.toLowerCase());
+  const matchesWifi = filters.wifiOnly ? train.hasWifi : true;
+  const matchesPrice = train.payment.basePrice <= Number(filters.maxPrice);
+  const matchesCity =
+    filters.selectedCity === '' ||
+    train.route.from.city === filters.selectedCity ||
+    train.route.to.city === filters.selectedCity;
+
+  return (matchesSearch || matchesSearchName) && matchesWifi && matchesPrice && matchesCity;
+});
 
   useEffect(() => {
     setCurrentPage(1);

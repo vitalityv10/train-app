@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Container } from 'react-bootstrap';
-import Hello from './Hello';
-import TrainFilters from './molecules/TrainFilter';
-import TrainList from './train/TrainList';
-import AppPagination from './molecules/AppPagination';
+import TrainFilters from '../components/train/TrainFilter';
+import TrainList from '../components/train/TrainList';
+import AppPagination from '../components/utils/AppPagination';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { initialTrainsData, getAllCities } from '../data/trains';
 import { useFilteredTrains } from '../hooks/useFilteredTrains';
-import { useAuth } from './auth/AuthContext';
+import { useAuth } from '../components/auth/AuthContext';
 const CustomContainer = styled(Container)`
   background-color: #f8f9fa;
   padding: 20px;
@@ -33,7 +32,6 @@ export default function Home() {
 
   return (
     <>
-      <Hello />
       <CustomContainer className="my-5 shadow-sm">
         <h2 className="mb-4 text-center">Available Trains</h2>
         

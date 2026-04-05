@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { Container, Row, Col} from 'react-bootstrap';
@@ -9,13 +8,13 @@ import { AuthProvider } from './components/auth/AuthContext';
 import AppNavbar from './components/menu/AppNavbar';
 import Menu from './components/menu/Menu';     
 
-import Home from './components/Home'; 
-import About from './components/menu/About';
-import Login from './components/auth/Login';
-import UserProfile from './components/user/UserProfile';
+import Home from './pages/Home'; 
+import About from './pages/About';
+import Login from './pages/auth/Login';
+import UserProfile from './pages/UserProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import Cart from './components/Cart';
-import { WishList } from './components/WishList';  
+import Cart from './pages/Cart';
+import {WishList}  from './pages/WishList';  
 
 const Header = styled.header`
   border: 2px solid #281d8d;
@@ -27,8 +26,6 @@ const Header = styled.header`
 `;
 
 export default function App() {
-  const [isUK, setIsUK] = useState(true);
-
   return (
     <AuthProvider>
       <Container fluid as={Header} className="p-3 mb-4">
@@ -39,16 +36,13 @@ export default function App() {
           <Col xs="auto" lg={4} className="d-flex justify-content-end">
             <Menu />
           </Col>
-          
         </Row>
       </Container>
     
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/about' element={<About isUK={isUK} />} />
-        
+        <Route path='/about' element={<About/>} />
         <Route path='/login' element={<Login />} />
-        {/* <Route path='/register' element={<Register />} /> */}
         <Route path='/cart' element={<Cart />} />
         <Route path='/wish-list' element={ <WishList />} />
         

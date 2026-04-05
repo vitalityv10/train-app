@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col } from 'react-bootstrap';
-import SearchInput from '../atoms/SearchInput';
-import FilterCheckbox from '../atoms/FilterCheckbox';
+import SearchInput from '../utils/SearchInput';
+import FilterCheckbox from '../utils/FilterCheckbox';
 
 export default function TrainFilters({ 
   searchQuery, onSearchChange, 
@@ -36,7 +36,7 @@ export default function TrainFilters({
         <input 
           type="range" 
           className="form-range" 
-          min="0" max="300" step="10"
+          min="0" max="500" step="10"
           value={maxPrice}
           onChange={(e) => onPriceChange(e.target.value)}
         />
