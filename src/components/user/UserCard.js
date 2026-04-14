@@ -1,16 +1,29 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import { useAuth } from '../auth/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-export default function UserCard({ name, age, city, onGreet }) {
+export default function UserCard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
-    <Card className="mb-3 shadow-sm" style={{ borderLeft: '4px solid #3c14d9' }}>
-      <Card.Body>
-        <Card.Title>{name}</Card.Title>
-        <Card.Text>
-          <strong>Age:</strong> {age} <br />
-          <strong>City:</strong> {city}
-        </Card.Text>
-      </Card.Body>
-    </Card>
+    <div className="text-center p-4 shadow-sm rounded bg-white">
+      <img
+        src={user.photo}
+        alt={user.name}
+        style={{ width: 80, height: 80, borderRadius: '50%', marginBottom: 12 }}
+      />
+      <h5>{user.name}</h5>
+      <p className="text-muted small">{user.email}</p>
+      <Button variant="outline-danger" size="sm" onClick={handleLogout}>
+        Вийти
+      </Button>
+    </div>
   );
 }

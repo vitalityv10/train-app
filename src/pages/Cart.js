@@ -3,16 +3,17 @@ import { Container, Table, Button, Badge } from 'react-bootstrap';
 import { useAuth } from '../components/auth/AuthContext';
 import { FaWifi, FaSnowflake } from 'react-icons/fa';
 import CheckoutModal from '../components/checkout/CheckoutModal';
-
 export default function Cart() {
-  const { cart, removeFromCart, user, purchaseTickets, clearCart } = useAuth();
+  const { user, purchaseTickets, cart, removeFromCart, clearCart} = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
 
   const totalPrice = cart.items.reduce((sum, item) => sum + item.payment.basePrice, 0);
 
-  const handleSuccess = (tickets) => {
-    purchaseTickets(tickets);
-    clearCart();
+ const handleSuccess = async (tickets) => {
+    await purchaseTickets(tickets);
+    await clearCart();
+    setShowCheckout(false);
+    alert("Квитки успішно придбано!");
   };
 
   if (!user)

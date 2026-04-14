@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Tab, Tabs, Badge } from 'react-bootstrap';
 import { FaWifi, FaSnowflake, FaCreditCard, FaPhone } from 'react-icons/fa';
 import { useSeatSelection } from '../../hooks/useSeatSelection';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase'; 
 
 const statusColor = {
   available: '#d4edda',
@@ -11,8 +13,33 @@ const statusColor = {
 
 function SeatGrid({ train, seats, onSelect }) {
   const [activeCarriage, setActiveCarriage] = useState(1);
+  const [globalOccupied, setGlobalOccupied] = useState([]); 
+  
   const carriages = [...new Set(seats.map(s => s.carriage))];
   const visible = seats.filter(s => s.carriage === activeCarriage);
+
+  useEffect(() => {
+  if (!train || !train.route) return;
+
+  const timeString = train.route?.from?.departureTime;
+  const dateOnly = timeString ? new Date(timeString).toISOString().split('T')[0] : 'unknown-date';
+  
+  const trainIdentifier = train.id || train.number;
+
+  const occupancyId = `${trainIdentifier}_${dateOnly}`;
+  
+  console.log("Шукаємо зайняті місця в документі:", occupancyId); 
+
+  const unsubscribe = onSnapshot(doc(db, 'trains_occupancy', occupancyId), (docSnap) => {
+    if (docSnap.exists()) {
+      setGlobalOccupied(docSnap.data().occupiedSeats || []);
+    } else {
+      setGlobalOccupied([]);
+    }
+  });
+
+  return () => unsubscribe();
+}, [train]);
 
   return (
     <div className="mb-3">
@@ -27,24 +54,32 @@ function SeatGrid({ train, seats, onSelect }) {
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: 5 }}>
-        {visible.map(seat => (
-          <div
-            key={`${seat.carriage}-${seat.number}`}
-            onClick={() => seat.status !== 'booked' && onSelect(train.id, seat.carriage, seat.number)}
-            style={{
-              background: statusColor[seat.status],
-              border: '1px solid #ccc',
-              borderRadius: 4,
-              padding: '5px 3px',
-              textAlign: 'center',
-              cursor: seat.status === 'booked' ? 'not-allowed' : 'pointer',
-              fontSize: 11,
-              fontWeight: 500,
-            }}
-          >
-            {seat.number}
-          </div>
-        ))}
+        {visible.map(seat => {
+          const seatId = `${seat.carriage}_${seat.number}`;
+          const isGloballyOccupied = globalOccupied.includes(seatId);
+          
+          const finalStatus = isGloballyOccupied ? 'booked' : seat.status;
+
+          return (
+            <div
+              key={seatId}
+              onClick={() => finalStatus !== 'booked' && onSelect(train.id, seat.carriage, seat.number)}
+              style={{
+                background: statusColor[finalStatus],
+                border: '1px solid #ccc',
+                borderRadius: 4,
+                padding: '5px 3px',
+                textAlign: 'center',
+                cursor: finalStatus === 'booked' ? 'not-allowed' : 'pointer',
+                fontSize: 11,
+                fontWeight: 500,
+                opacity: isGloballyOccupied ? 0.7 : 1 
+              }}
+            >
+              {seat.number}
+            </div>
+          );
+        })}
       </div>
       <div className="d-flex gap-3 mt-2 small">
         <span><span style={{ background: '#d4edda', padding: '1px 7px', borderRadius: 3 }}>■</span> Вільне</span>
@@ -71,7 +106,7 @@ export default function CheckoutModal({ show, onHide, cartItems, onSuccess }) {
 
   const validateCard = () => {
     const e = {};
-    if (!/^\d{16}$/.test(cardData.number.replace(/\s/g, ''))) e.number = 'Невірний номер картки';
+    if (!/^\d{16}$/.test(cardData.number.replace(/\s/g, ''))) e.number = 'Неправильний номер картки';
     if (!/^\d{2}\/\d{2}$/.test(cardData.expiry)) e.expiry = 'Формат: MM/YY';
     if (!/^\d{3}$/.test(cardData.cvv)) e.cvv = '3 цифри';
     if (!cardData.name.trim()) e.name = "Введіть ім'я";
@@ -81,7 +116,7 @@ export default function CheckoutModal({ show, onHide, cartItems, onSuccess }) {
 
   const validatePhone = () => {
     const e = {};
-    if (!/^\+?[\d\s]{10,13}$/.test(phone)) e.phone = 'Невірний номер телефону';
+    if (!/^\+?[\d\s]{10,13}$/.test(phone)) e.phone = 'Неправильний номер телефону';
     setErrors(e);
     return Object.keys(e).length === 0;
   };

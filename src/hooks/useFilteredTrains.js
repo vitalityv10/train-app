@@ -14,13 +14,20 @@ export function useFilteredTrains(trains, filters, itemsPerPage) {
     filters.selectedCity === '' ||
     train.route.from.city === filters.selectedCity ||
     train.route.to.city === filters.selectedCity;
+   
+  let matchDate = true;
+      if (filters.selectedDate) {
+        const filterTime = new Date(filters.selectedDate).getTime();
+        const trainTime = new Date(train.route.from.departureTime).getTime();
+        matchDate = trainTime <= filterTime + 86400000; 
+      }
 
-  return (matchesSearch || matchesSearchName) && matchesWifi && matchesPrice && matchesCity;
+  return (matchesSearch || matchesSearchName) && matchesWifi && matchesPrice && matchesCity && matchDate;
 });
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters.searchQuery, filters.wifiOnly, filters.maxPrice, filters.selectedCity]);
+  }, [filters.searchQuery, filters.wifiOnly, filters.maxPrice, filters.selectedCity, filters.selectedDate]);
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
