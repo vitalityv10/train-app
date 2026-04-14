@@ -1,108 +1,154 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { auth, db, googleProvider } from '../../firebase';
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import {
+  doc, getDoc, setDoc, updateDoc, arrayUnion
+} from 'firebase/firestore';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-
-  const [registeredUsers, setRegisteredUsers] = useState([
-    { id: 1, name: 'Admin', age: 20, city: 'Kyiv', cart: { userId: 1, items: [] } }
-  ]);
-
-  const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem('trainCart');
-    return saved ? JSON.parse(saved) : { userId: null, items: [] };
-  });
-
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem('trainWishlist');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [purchasedTickets, setPurchasedTickets] = useState(() => {
-    const saved = localStorage.getItem('purchasedTickets');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [cart, setCart] = useState({ items: [] });
+  const [wishlist, setWishlist] = useState([]);
+  const [purchasedTickets, setPurchasedTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('trainCart', JSON.stringify(cart));
-  }, [cart]);
+  const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    setLoading(true); 
 
-  useEffect(() => {
-    localStorage.setItem('trainWishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
+    if (firebaseUser) {
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
+      let userData;
 
-  useEffect(() => {
-    localStorage.setItem('purchasedTickets', JSON.stringify(purchasedTickets));
-  }, [purchasedTickets]);
-
-  const login = (userData) => {
-    setUser(userData);
-    setCart(prev => ({ ...prev, userId: userData.id }));
-  };
-
-  const logout = () => {
-    setUser(null);
-    setCart({ userId: null, items: [] });
-  };
-
-  const addToCart = (train) => {
-    setCart(prev => {
-      const existing = prev.items.find(item => item.id === train.id);
-      if (existing) {
-        return {
-          ...prev,
-          items: prev.items.map(item =>
-            item.id === train.id ? { ...item, quantity: item.quantity + 1 } : item
-          )
+      if (!userSnap.exists()) {
+        userData = {
+          name: firebaseUser.displayName || 'Користувач',
+          email: firebaseUser.email,
+          photo: firebaseUser.photoURL || '',
+          cart: { items: [] },
+          wishlist: [],
+          purchasedTickets: [],
         };
+        await setDoc(userRef, userData);
+      } else {
+        userData = userSnap.data();
       }
-      return { ...prev, items: [...prev.items, { ...train, quantity: 1 }] };
+      setUser({
+        uid: firebaseUser.uid,
+        name: firebaseUser.displayName,
+        email: firebaseUser.email,
+        photo: firebaseUser.photoURL,
+      });
+      
+      setCart(userData.cart || { items: [] });
+      setWishlist(userData.wishlist || []);
+      setPurchasedTickets(userData.purchasedTickets || []);
+
+    } else {
+      setUser(null);
+      setCart({ items: [] });
+      setWishlist([]);
+      setPurchasedTickets([]);
+    }
+
+    setLoading(false);
+  });
+
+  return unsubscribe;
+}, []);
+  const getUserRef = () => doc(db, 'users', user.uid);
+
+  // --- Auth ---
+  const loginWithGoogle = async () => {
+    await signInWithPopup(auth, googleProvider);
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+  };
+
+  // --- Cart ---
+  const addToCart = async (train) => {
+    const exists = cart.items.find(i => i.id === train.id);
+    const newItems = exists
+      ? cart.items.map(i => i.id === train.id ? { ...i, quantity: i.quantity + 1 } : i)
+      : [...cart.items, { ...train, quantity: 1 }];
+
+    const newCart = { items: newItems };
+    setCart(newCart);
+    await updateDoc(getUserRef(), { cart: newCart });
+  };
+
+  const removeFromCart = async (id) => {
+    const newCart = { items: cart.items.filter(i => i.id !== id) };
+    setCart(newCart);
+    await updateDoc(getUserRef(), { cart: newCart });
+  };
+
+  const clearCart = async () => {
+    const newCart = { items: [] };
+    setCart(newCart);
+    await updateDoc(getUserRef(), { cart: newCart });
+  };
+
+  // --- Wishlist ---
+  const addToWishlist = async (train) => {
+    if (wishlist.find(i => i.id === train.id)) return;
+    const newWishlist = [...wishlist, train];
+    setWishlist(newWishlist);
+    await updateDoc(getUserRef(), { wishlist: newWishlist });
+  };
+
+  const removeFromWishlist = async (id) => {
+    const newWishlist = wishlist.filter(i => i.id !== id);
+    setWishlist(newWishlist);
+    await updateDoc(getUserRef(), { wishlist: newWishlist });
+  };
+
+  // --- Tickets ---
+ const purchaseTickets = async (tickets) => {
+  const updated = [...purchasedTickets, ...tickets];
+  setPurchasedTickets(updated);
+  await updateDoc(getUserRef(), { purchasedTickets: updated });
+
+for (const ticket of tickets) {
+  const timeString = ticket.route?.from?.departureTime;
+  const dateOnly = timeString ? new Date(timeString).toISOString().split('T')[0] : 'unknown-date';
+  
+  const trainIdentifier = ticket.id || ticket.number; 
+
+  const occupancyDocId = `${trainIdentifier}_${dateOnly}`;
+  const seatId = `${ticket.seat.carriage}_${ticket.seat.number}`;
+
+  const occupancyRef = doc(db, 'trains_occupancy', occupancyDocId);
+  const occupancySnap = await getDoc(occupancyRef);
+
+  if (occupancySnap.exists()) {
+    await updateDoc(occupancyRef, {
+      occupiedSeats: arrayUnion(seatId)
     });
-  };
-
-  const updateQuantity = (id, delta) => {
-    setCart(prev => ({
-      ...prev,
-      items: prev.items.map(item =>
-        item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
-      )
-    }));
-  };
-
-  const removeFromCart = (id) => {
-    setCart(prev => ({
-      ...prev,
-      items: prev.items.filter(item => item.id !== id)
-    }));
-  };
-
-  const clearCart = () => {
-    setCart({ userId: user?.id ?? null, items: [] });
-  };
-
-  const addToWishlist = (train) => {
-    setWishlist(prev => {
-      if (prev.find(item => item.id === train.id)) return prev;
-      return [...prev, train];
+  } else {
+    await setDoc(occupancyRef, {
+      occupiedSeats: [seatId]
     });
-  };
-
-  const removeFromWishlist = (id) => {
-    setWishlist(prev => prev.filter(item => item.id !== id));
-  };
-
-  const purchaseTickets = (tickets) => {
-    setPurchasedTickets(prev => [...prev, ...tickets]);
-  };
+  }
+}
+};
+  if (loading) return <div className="text-center mt-5">Завантаження...</div>;
 
   return (
     <AuthContext.Provider value={{
-      user, login, logout,
-      cart, addToCart, updateQuantity, removeFromCart, clearCart,
+      user, loginWithGoogle, logout,
+      cart, addToCart, removeFromCart, clearCart,
       wishlist, addToWishlist, removeFromWishlist,
       purchasedTickets, purchaseTickets,
-      registeredUsers, setRegisteredUsers,
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,57 +1,43 @@
 import { Routes, Route } from 'react-router-dom';
-import styled from 'styled-components';
-import { Container, Row, Col} from 'react-bootstrap';
-import './App.css'; 
+import './App.css';
 
 import { AuthProvider } from './components/auth/AuthContext';
-
 import AppNavbar from './components/menu/AppNavbar';
-import Menu from './components/menu/Menu';     
 
-import Home from './pages/Home'; 
+import Home from './pages/Home';
 import About from './pages/About';
-import Login from './pages/auth/Login';
+import LoginPage from './pages/auth/LoginPage';
 import UserProfile from './pages/UserProfile';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Cart from './pages/Cart';
-import {WishList}  from './pages/WishList';  
+import { WishList } from './pages/WishList';
 
-const Header = styled.header`
-  border: 2px solid #281d8d;
-  color: #281d8d;
-  border-radius: 5px;
-  flex-direction: row; 
-  justify-content: space-between;
-  align-items: center;
-`;
+import Footer from './components/menu/Footer';
 
 export default function App() {
   return (
     <AuthProvider>
-      <Container fluid as={Header} className="p-3 mb-4">
-        <Row className="align-items-center justify-content-between">
-          <Col xs="auto" lg={8} className="d-flex justify-content-start">
-            <AppNavbar />
-          </Col>          
-          <Col xs="auto" lg={4} className="d-flex justify-content-end">
-            <Menu />
-          </Col>
-        </Row>
-      </Container>
-    
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/about' element={<About/>} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/cart' element={<Cart />} />
-        <Route path='/wish-list' element={ <WishList />} />
+      <div className="d-flex flex-column min-vh-100 bg-light"> 
         
-        <Route path='/profile' element={
-          <ProtectedRoute>
-            <UserProfile />
-          </ProtectedRoute>
-        } />
-      </Routes>
+        <AppNavbar />
+
+        <main className="flex-grow-1">
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/login' element={<LoginPage />} />
+            <Route path='/cart' element={<Cart />} />
+            <Route path='/wish-list' element={<WishList />} />
+            <Route path='/profile' element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </main>
+
+        <Footer />
+      </div>
     </AuthProvider>
   );
 }
