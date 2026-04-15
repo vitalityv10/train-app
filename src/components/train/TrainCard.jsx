@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { FaHeart, FaWifi, FaSnowflake } from 'react-icons/fa';
 import { useTrainCard } from '../../hooks/useTrainCard';
 import TrainCardModal from './TrainCardModal';
-
+import { REACT_APP_URL } from '../../config';
 const HoverContainer = styled.div`
   opacity: 0;
   margin-top: 10px;
@@ -46,7 +46,7 @@ export default function TrainCard({ train }) {
 
         <Card.Img
           variant="top"
-          src={train.imageUrl}
+          src={REACT_APP_URL + train.imageUrl}
           alt={`${route.from.city} → ${route.to.city}`}
           style={{ height: '160px', objectFit: 'cover' }}
         />
