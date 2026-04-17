@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import { FaWifi, FaSnowflake } from 'react-icons/fa';
-
+import CityInsights from './CityInsights';
 export default function TrainCardModal({ train, show, onHide, onAddToCart }) {
   const { route, seat } = train;
   const departureTime = new Date(route.from.departureTime).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
@@ -26,6 +25,10 @@ export default function TrainCardModal({ train, show, onHide, onAddToCart }) {
           <li><strong>Wi-Fi:</strong> {train.hasWifi ? 'Так' : 'Ні'}</li>
           <li><strong>Кондиціонер:</strong> {train.hasAirConditioning ? 'Так' : 'Ні'}</li>
         </ul>
+        <CityInsights
+          fromCity={route.from.city}
+          toCity={route.to.city}
+          />
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide}>Закрити</Button>
