@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { FaTrain, FaHeart, FaShoppingCart, FaUser, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
-import { useAuth } from '../auth/AuthContext'; // Перевір правильність шляху до твого AuthContext
+import { useAuth } from '../context/auth/AuthContext'; // Перевір правильність шляху до твого AuthContext
 
 export default function AppNavbar() {
   const location = useLocation();

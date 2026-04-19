@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Navbar, Nav, Button } from 'react-bootstrap'; 
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../context/auth/AuthContext';
 
 const NavLink = styled(Link)`
   text-decoration: none;

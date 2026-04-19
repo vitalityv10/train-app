@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Button } from 'react-bootstrap';
-import { useAuth } from '../../components/auth/AuthContext';
+import { useAuth } from '../../components/context/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa';
 

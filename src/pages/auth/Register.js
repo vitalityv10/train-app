@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Card } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../components/auth/AuthContext';
+import { useAuth } from '../../components/context/auth/AuthContext';
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', age: '', city: '' });

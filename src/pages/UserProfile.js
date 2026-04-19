@@ -1,27 +1,27 @@
-import React from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
-import { useAuth } from '../components/auth/AuthContext';
-import UserCard from '../components/user/UserCard';
-import PurchasedTickets from '../components/user/PurchasedTickets';
-import AppPagination from '../components/utils/AppPagination';
-import { usePagination } from '../hooks/usePagination'; 
+import React from "react";
+import { Container, Row, Col, Card } from "react-bootstrap";
+import UserCard from "../components/user/UserCard";
+import PurchasedTickets from "../components/user/PurchasedTickets";
+import AppPagination from "../components/utils/AppPagination";
+import { usePagination } from "../hooks/usePagination";
+import { useTickets } from "../components/context/TicketsContext";
 
 export default function UserProfile() {
-  const { purchasedTickets } = useAuth();
+  const { purchasedTickets } = useTickets();
 
-  const { 
-    currentPage, 
-    totalPages, 
-    currentData: paginatedTickets, 
-    setCurrentPage 
+  const {
+    currentPage,
+    totalPages,
+    currentData: paginatedTickets,
+    setCurrentPage,
   } = usePagination(purchasedTickets, 3);
 
   return (
-    <div style={{ backgroundColor: '#f4f8fb', paddingBottom: '50px' }}>
+    <div style={{ backgroundColor: "#f4f8fb", paddingBottom: "50px" }}>
       <Container className="pt-5 mt-3">
         <Row className="g-4">
           <Col md={4} lg={4}>
-            <div className="sticky-top" style={{ top: '100px', zIndex: 1 }}>
+            <div className="sticky-top" style={{ top: "100px", zIndex: 1 }}>
               <UserCard />
             </div>
           </Col>
@@ -29,14 +29,11 @@ export default function UserProfile() {
           <Col md={8} lg={8}>
             <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
               <Card.Header className="bg-white border-bottom-0 pt-4 pb-0 px-4">
-                <h4 className="text-primary mb-3 fw-bold">
-                  🎫 Куплені квитки
-                </h4>
+                <h4 className="text-primary mb-3 fw-bold">🎫 Куплені квитки</h4>
               </Card.Header>
               <Card.Body className="bg-white px-4 pb-4">
-                
                 <PurchasedTickets tickets={paginatedTickets} />
-                
+
                 {totalPages > 1 && (
                   <div className="mt-4 d-flex justify-content-center">
                     <AppPagination
@@ -46,7 +43,6 @@ export default function UserProfile() {
                     />
                   </div>
                 )}
-
               </Card.Body>
             </Card>
           </Col>

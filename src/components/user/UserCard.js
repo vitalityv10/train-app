@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { useAuth } from '../auth/AuthContext';
+import { useAuth } from '../context/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function UserCard() {

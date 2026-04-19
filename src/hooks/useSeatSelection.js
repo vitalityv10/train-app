@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from "react";
 
 const generateSeats = (carriages, seatsPerCarriage) => {
   const seats = [];
   for (let c = 1; c <= carriages; c++) {
     for (let s = 1; s <= seatsPerCarriage; s++) {
-      seats.push({ carriage: c, number: s, status: 'available' });
+      seats.push({ carriage: c, number: s, status: "available" });
     }
   }
   return seats;
@@ -13,44 +13,34 @@ const generateSeats = (carriages, seatsPerCarriage) => {
 const buildInitialStore = () => {
   const store = {};
   for (let id = 1; id <= 20; id++) {
-    store[id] = generateSeats(3, 36); 
+    store[id] = generateSeats(3, 36);
   }
   return store;
 };
 
 export function useSeatSelection() {
-  const [seatsStore, setSeatsStore] = useState(() => {
-    const saved = localStorage.getItem('seatsStore');
-    return saved ? JSON.parse(saved) : buildInitialStore();
-  });
-
-  useEffect(() => {
-    localStorage.setItem('seatsStore', JSON.stringify(seatsStore));
-  }, [seatsStore]);
+  const [seatsStore, setSeatsStore] = useState(buildInitialStore);
 
   const getSeatsForTrain = (trainId) => seatsStore[trainId] || [];
 
   const selectSeat = (trainId, carriage, seatNumber) => {
-    setSeatsStore(prev => ({
+    setSeatsStore((prev) => ({
       ...prev,
-      [trainId]: prev[trainId].map(seat =>
+      [trainId]: prev[trainId].map((seat) =>
         seat.carriage === carriage && seat.number === seatNumber
-          ? { ...seat, status: seat.status === 'selected' ? 'available' : 'selected' }
-          : seat 
+          ? {
+              ...seat,
+              status: seat.status === "selected" ? "available" : "selected",
+            }
+          : seat,
       ),
     }));
   };
 
-  const bookSeat = (trainId, carriage, seatNumber) => {
-    setSeatsStore(prev => ({
-      ...prev,
-      [trainId]: prev[trainId].map(seat =>
-        seat.carriage === carriage && seat.number === seatNumber
-          ? { ...seat, status: 'booked' }
-          : seat
-      ),
-    }));
+  // Функція для скидання вибраних місць
+  const resetSeats = () => {
+    setSeatsStore(buildInitialStore());
   };
 
-  return { getSeatsForTrain, selectSeat, bookSeat };
+  return { getSeatsForTrain, selectSeat, resetSeats };
 }
