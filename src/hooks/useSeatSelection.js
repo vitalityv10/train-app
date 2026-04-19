@@ -10,13 +10,6 @@ const generateSeats = (carriages, seatsPerCarriage) => {
   return seats;
 };
 
-const classConfig = {
-  'Lux':     { carriages: 2, seatsPerCarriage: 18 },
-  'Coupe':   { carriages: 3, seatsPerCarriage: 36 },
-  '1-Class': { carriages: 4, seatsPerCarriage: 54 },
-  '2-Class': { carriages: 5, seatsPerCarriage: 54 },
-};
-
 const buildInitialStore = () => {
   const store = {};
   for (let id = 1; id <= 20; id++) {
@@ -43,9 +36,7 @@ export function useSeatSelection() {
       [trainId]: prev[trainId].map(seat =>
         seat.carriage === carriage && seat.number === seatNumber
           ? { ...seat, status: seat.status === 'selected' ? 'available' : 'selected' }
-          : seat.status === 'selected' 
-            ? { ...seat, status: 'available' }
-            : seat
+          : seat 
       ),
     }));
   };

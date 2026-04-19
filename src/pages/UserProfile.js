@@ -3,13 +3,21 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 import { useAuth } from '../components/auth/AuthContext';
 import UserCard from '../components/user/UserCard';
 import PurchasedTickets from '../components/user/PurchasedTickets';
+import AppPagination from '../components/utils/AppPagination';
+import { usePagination } from '../hooks/usePagination'; 
 
 export default function UserProfile() {
   const { purchasedTickets } = useAuth();
 
+  const { 
+    currentPage, 
+    totalPages, 
+    currentData: paginatedTickets, 
+    setCurrentPage 
+  } = usePagination(purchasedTickets, 3);
+
   return (
     <div style={{ backgroundColor: '#f4f8fb', paddingBottom: '50px' }}>
-      
       <Container className="pt-5 mt-3">
         <Row className="g-4">
           <Col md={4} lg={4}>
@@ -26,7 +34,19 @@ export default function UserProfile() {
                 </h4>
               </Card.Header>
               <Card.Body className="bg-white px-4 pb-4">
-                <PurchasedTickets tickets={purchasedTickets} />
+                
+                <PurchasedTickets tickets={paginatedTickets} />
+                
+                {totalPages > 1 && (
+                  <div className="mt-4 d-flex justify-content-center">
+                    <AppPagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
+                )}
+
               </Card.Body>
             </Card>
           </Col>

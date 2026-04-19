@@ -11,12 +11,14 @@ const statusColor = {
   selected:  '#cce5ff',
 };
 
-function SeatGrid({ train, seats, onSelect }) {
+function SeatGrid({ train, seats, onSelect, maxQuantity }) {
   const [activeCarriage, setActiveCarriage] = useState(1);
   const [globalOccupied, setGlobalOccupied] = useState([]); 
   
   const carriages = [...new Set(seats.map(s => s.carriage))];
   const visible = seats.filter(s => s.carriage === activeCarriage);
+  
+  const currentSelectedCount = seats.filter(s => s.status === 'selected').length;
 
   useEffect(() => {
   if (!train || !train.route) return;
@@ -25,11 +27,8 @@ function SeatGrid({ train, seats, onSelect }) {
   const dateOnly = timeString ? new Date(timeString).toISOString().split('T')[0] : 'unknown-date';
   
   const trainIdentifier = train.id || train.number;
-
   const occupancyId = `${trainIdentifier}_${dateOnly}`;
   
-  console.log("Шукаємо зайняті місця в документі:", occupancyId); 
-
   const unsubscribe = onSnapshot(doc(db, 'trains_occupancy', occupancyId), (docSnap) => {
     if (docSnap.exists()) {
       setGlobalOccupied(docSnap.data().occupiedSeats || []);
@@ -40,6 +39,17 @@ function SeatGrid({ train, seats, onSelect }) {
 
   return () => unsubscribe();
 }, [train]);
+
+  const handleSeatClick = (seat, finalStatus) => {
+    if (finalStatus === 'booked') return;
+    
+    if (finalStatus !== 'selected' && currentSelectedCount >= maxQuantity) {
+      alert(`Для цього поїзда ви можете обрати лише ${maxQuantity} місць (відповідно до кошика)`);
+      return;
+    }
+
+    onSelect(train.id, seat.carriage, seat.number);
+  };
 
   return (
     <div className="mb-3">
@@ -57,13 +67,12 @@ function SeatGrid({ train, seats, onSelect }) {
         {visible.map(seat => {
           const seatId = `${seat.carriage}_${seat.number}`;
           const isGloballyOccupied = globalOccupied.includes(seatId);
-          
           const finalStatus = isGloballyOccupied ? 'booked' : seat.status;
 
           return (
             <div
               key={seatId}
-              onClick={() => finalStatus !== 'booked' && onSelect(train.id, seat.carriage, seat.number)}
+              onClick={() => handleSeatClick(seat, finalStatus)} 
               style={{
                 background: statusColor[finalStatus],
                 border: '1px solid #ccc',
@@ -98,11 +107,11 @@ export default function CheckoutModal({ show, onHide, cartItems, onSuccess }) {
   const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
 
-  const selectedSeats = cartItems.map(item => ({
-    item,
-    seat: getSeatsForTrain(item.id).find(s => s.status === 'selected'),
-  }));
-  const allSeatsSelected = selectedSeats.every(s => s.seat);
+  const allSeatsSelected = cartItems.every(item => {
+    const requiredQty = item.quantity || 1;
+    const selectedSeats = getSeatsForTrain(item.id).filter(s => s.status === 'selected');
+    return selectedSeats.length === requiredQty;
+  });
 
   const validateCard = () => {
     const e = {};
@@ -125,17 +134,26 @@ export default function CheckoutModal({ show, onHide, cartItems, onSuccess }) {
     const valid = paymentMethod === 'card' ? validateCard() : validatePhone();
     if (!valid) return;
 
-    const tickets = selectedSeats.map(({ item, seat }) => ({
-      ...item,
-      seat: { ...item.seat, carriage: seat.carriage, number: seat.number },
-      payment: {
-        ...item.payment,
-        status: paymentMethod === 'card' ? 'Paid' : 'Pending',
-        method: paymentMethod,
-        paidAt: new Date().toISOString(),
-      },
-      ticketId: `TKT-${Date.now()}-${item.id}`,
-    }));
+    const tickets = [];
+    
+    cartItems.forEach(item => {
+      const selectedSeats = getSeatsForTrain(item.id).filter(s => s.status === 'selected');
+      
+      selectedSeats.forEach((seat, index) => {
+        tickets.push({
+          ...item,
+          quantity: 1, 
+          seat: { ...item.seat, carriage: seat.carriage, number: seat.number },
+          payment: {
+            ...item.payment,
+            status: paymentMethod === 'card' ? 'Paid' : 'Pending',
+            method: paymentMethod,
+            paidAt: new Date().toISOString(),
+          },
+          ticketId: `TKT-${Date.now()}-${item.id}-${index}`, 
+        });
+      });
+    });
 
     onSuccess(tickets);
     onHide();
@@ -153,8 +171,10 @@ export default function CheckoutModal({ show, onHide, cartItems, onSuccess }) {
         {step === 'seats' ? (
           <>
             {cartItems.map(item => {
+              const requiredQty = item.quantity || 1;
               const seats = getSeatsForTrain(item.id);
-              const chosen = seats.find(s => s.status === 'selected');
+              const chosenSeats = seats.filter(s => s.status === 'selected'); 
+
               return (
                 <div key={item.id} className="mb-4 border rounded p-3">
                   <div className="d-flex justify-content-between align-items-center mb-2">
@@ -167,18 +187,28 @@ export default function CheckoutModal({ show, onHide, cartItems, onSuccess }) {
                     <div>
                       {item.hasWifi && <FaWifi className="text-primary me-2" />}
                       {item.hasAirConditioning && <FaSnowflake className="text-info me-2" />}
-                      <Badge bg="success">{item.payment.basePrice} UAH</Badge>
+                      <Badge bg="success">{item.payment.basePrice * requiredQty} UAH</Badge>
                     </div>
                   </div>
+                  
                   <SeatGrid
                     train={item}
                     seats={seats}
                     onSelect={selectSeat}
+                    maxQuantity={requiredQty} 
                   />
-                  {chosen
-                    ? <p className="text-success small mb-0">✅ Вагон {chosen.carriage}, місце {chosen.number}</p>
-                    : <p className="text-danger small mb-0">⚠️ Оберіть місце</p>
-                  }
+                  
+                  <div className="mt-2">
+                    {chosenSeats.length === requiredQty ? (
+                      <p className="text-success small mb-0">
+                        ✅ Вибрано всі місця: {chosenSeats.map(s => `В${s.carriage} М${s.number}`).join(', ')}
+                      </p>
+                    ) : (
+                      <p className="text-danger small mb-0">
+                        ⚠️ Оберіть ще {requiredQty - chosenSeats.length} місць (Вибрано: {chosenSeats.length} з {requiredQty})
+                      </p>
+                    )}
+                  </div>
                 </div>
               );
             })}

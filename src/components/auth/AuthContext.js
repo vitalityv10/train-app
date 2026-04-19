@@ -97,6 +97,19 @@ export const AuthProvider = ({ children }) => {
     setCart(newCart);
     await updateDoc(getUserRef(), { cart: newCart });
   };
+const updateQuantity = async (itemId, newQuantity) => {
+  if (!user) return;
+
+  const updatedItems = cart.items.map(item => 
+    item.id === itemId ? { ...item, quantity: newQuantity } : item
+  );
+  setCart({ ...cart, items: updatedItems });
+
+  const userRef = doc(db, 'users', user.uid);
+  await updateDoc(userRef, {
+    'cart.items': updatedItems
+  });
+};
 
   // --- Wishlist ---
   const addToWishlist = async (train) => {
@@ -146,7 +159,7 @@ for (const ticket of tickets) {
   return (
     <AuthContext.Provider value={{
       user, loginWithGoogle, logout,
-      cart, addToCart, removeFromCart, clearCart,
+      cart, addToCart, removeFromCart, clearCart, updateQuantity,
       wishlist, addToWishlist, removeFromWishlist,
       purchasedTickets, purchaseTickets,
     }}>
