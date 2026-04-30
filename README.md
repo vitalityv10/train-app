@@ -1,70 +1,64 @@
-# Getting Started with Create React App
+🚂 TrainApp — Система бронювання залізничних квитків
+TrainApp — це сучасний вебдодаток (SPA) для пошуку, фільтрації та онлайн-бронювання залізничних квитків. Проєкт побудований на базі React та використовує хмарні сервіси Firebase для авторизації та зберігання даних у реальному часі.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+🚀 Основні можливості
+Авторизація через Google: Швидкий вхід без паролів за допомогою Firebase Auth.
 
-## Available Scripts
+Динамічний пошук та фільтрація: Пошук рейсів за містом, ціною, датою та зручностями (Wi-Fi, кондиціонер).
 
-In the project directory, you can run:
+Персоналізація (LocalStorage): Збереження параметрів пошуку навіть після оновлення сторінки.
 
-### `npm start`
+Розумний кошик: Додавання квитків, редагування кількості та миттєва синхронізація з хмарою.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Адаптивний дизайн: Коректне відображення на смартфонах, планшетах та десктопах завдяки React-Bootstrap.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Пагінація: Зручна навігація великими списками даних за допомогою кастомного хука.
 
-### `npm test`
+🛠 Технологічний стек
+Frontend: React (Hooks, Context API)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Стилізація: React-Bootstrap, Styled Components
 
-### `npm run build`
+Backend/Database: Firebase Firestore
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Authentication: Firebase Auth (Google Provider)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Маршрутизація: React Router
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Іконки: React Icons
 
-### `npm run eject`
+📁 Структура проєкту
+Короткий огляд організації папок у src/:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+components/ — модульні UI-компоненти, розділені за функціями (cart, auth, train тощо).
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+context/ — глобальне управління станом (Auth, Cart, Tickets).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+hooks/ — кастомні React-хуки для бізнес-логіки.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+pages/ — повносторінкові компоненти (Home, About, Cart, Profile).
 
-## Learn More
+data/ — статичні дані та константи.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+⚙️ Встановлення та запуск
+Клонуйте репозиторій:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+git clone https://github.com/your-username/train-app.git
+cd train-app
+Встановіть залежності:
 
-### Code Splitting
+npm install
+Налаштуйте змінні оточення:
+Створіть файл .env у корені проєкту та додайте ваші ключі Firebase:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Code snippet
+REACT_APP_FIREBASE_API_KEY=your_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_domain
+# ... інше
+Запустіть проєкт:
 
-### Analyzing the Bundle Size
+npm start
+🏗 Архітектурні рішення
+Проєкт розроблений з дотриманням принципу Separation of Concerns (розподіл обов'язків). Вся взаємодія з базою даних Firestore винесена в окремі провайдери контексту та кастомні хуки, що дозволяє тримати UI-компоненти "чистими" та сфокусованими лише на відображенні даних.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Розроблено як курсовий проєкт студентом ІФНТУНГ.
