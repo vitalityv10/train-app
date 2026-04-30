@@ -37,7 +37,6 @@ export function useSeatSelection() {
     }));
   };
 
-  // Функція для скидання вибраних місць
   const resetSeats = () => {
     setSeatsStore(buildInitialStore());
   };
